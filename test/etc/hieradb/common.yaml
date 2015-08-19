@@ -4,11 +4,3 @@ json_and_yaml: json_and_yaml_yaml_value
 bl: should_be_blocked
 wl: should_be_allowed
 black_and_white: should_be_blocked
-
-pone: one_yaml
-
-ptwo:
-  key_yaml: value_yaml
-pyaml_foo: foo_yaml
-pyaml_bar: bar_yaml
-pfoo: foo_yaml

@@ -1,3 +1,4 @@
+require 'rubygems'
 gem 'minitest'
 #require 'minitest/autorun'
 require 'minitest/spec'
@@ -28,14 +29,6 @@ class Hiera
           end
         end 
       end
-
-      # cases:
-      # bl, wl, result
-      # 00 -> reject
-      # 01 -> found
-      # 10 -> reject
-      # 11 -> reject*
-      # proove a few multi-backend cases?
 
       it "lookup of bl should not return value" do
         assert_throws(:no_such_key) do 

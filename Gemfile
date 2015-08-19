@@ -1,4 +1,4 @@
-#source "http://rubygems.org"
-source "http://lhdpup01v.pgds.local/gems/"
+source "http://rubygems.org"
 
 gem "hiera"
+gem "minitest"

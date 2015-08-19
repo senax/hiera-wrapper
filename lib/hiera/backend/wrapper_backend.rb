@@ -49,6 +49,7 @@ class Hiera
         end
       end
 
+      #def lookup(key, scope, order_override, resolution_type)
       def lookup(key, scope, order_override, resolution_type, context)
         Hiera.debug("WRAP.lookup #{key.inspect}, resolution_type = #{resolution_type.inspect}")
         @backends ||= {}
