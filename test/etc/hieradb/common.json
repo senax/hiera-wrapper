@@ -1,0 +1,9 @@
+{
+  "json_only": "json_only_value",
+  "json_and_yaml": "json_and_yaml_json_value",
+  "pone": "one_json",
+  "ptwo": { "key_json": "value_json" },
+  "pjson_foo": "foo_json",
+  "pjson_bar": "bar_json",
+  "pfoo": "foo_json"
+}

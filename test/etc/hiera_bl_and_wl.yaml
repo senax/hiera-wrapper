@@ -1,0 +1,21 @@
+---
+:backends:
+  - wrapper
+:logger: console
+:hierarchy:
+  - "%{location}"
+  - "%{environment}"
+  - common
+:wrapper:
+  :backends:
+  - :yaml:
+      :blacklist:
+        - bl
+      :whitelist:
+        - ^wl$
+        - black_and_white
+
+:yaml:
+  :datadir: test/etc/hieradb
+:puppet:
+  :datasource: data
