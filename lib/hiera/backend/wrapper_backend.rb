@@ -1,5 +1,21 @@
 class Hiera
   module Backend
+    class Backend1xWrapper
+      def initialize(wrapped)
+        @wrapped = wrapped
+      end
+
+      def lookup(key, scope, order_override, resolution_type, context)
+        Hiera.debug("Using Hiera 1.x backend API to access instance of class #{@wrapped.class.name}. Lookup recursion will not be detected")
+        value = @wrapped.lookup(key, scope, order_override, resolution_type.is_a?(Hash) ? :hash : resolution_type)
+
+        # The most likely cause when an old backend returns nil is that the key was not found. In any case, it is
+        # impossible to know the difference between that and a found nil. The throw here preserves the old behavior.
+        throw (:no_such_key) if value.nil?
+        value
+      end
+    end
+
     class Wrapper_backend
       def initialize(cache=nil)
         require 'yaml'
@@ -49,8 +65,9 @@ class Hiera
         end
       end
 
-      #def lookup(key, scope, order_override, resolution_type)
-      def lookup(key, scope, order_override, resolution_type, context)
+#      def lookup(key, scope, order_override, resolution_type, context)
+      def lookup(key, scope, order_override, resolution_type)
+
         Hiera.debug("WRAP.lookup #{key.inspect}, resolution_type = #{resolution_type.inspect}")
         @backends ||= {}
         answer = nil
