@@ -1,21 +1,5 @@
 class Hiera
   module Backend
-    class Backend1xWrapper
-      def initialize(wrapped)
-        @wrapped = wrapped
-      end
-
-      def lookup(key, scope, order_override, resolution_type, context)
-        Hiera.debug("Using Hiera 1.x backend API to access instance of class #{@wrapped.class.name}. Lookup recursion will not be detected")
-        value = @wrapped.lookup(key, scope, order_override, resolution_type.is_a?(Hash) ? :hash : resolution_type)
-
-        # The most likely cause when an old backend returns nil is that the key was not found. In any case, it is
-        # impossible to know the difference between that and a found nil. The throw here preserves the old behavior.
-        throw (:no_such_key) if value.nil?
-        value
-      end
-    end
-
     class Wrapper_backend
       def initialize(cache=nil)
         require 'yaml'
@@ -36,10 +20,10 @@ class Hiera
         end
       end
 
-      def find_backend(backend_constant)
-        backend = Backend.const_get(backend_constant).new
-        return backend.method(:lookup).arity == 4 ? Backend1xWrapper.new(backend) : backend
-      end
+#      def find_backend(backend_constant)
+#        backend = Backend.const_get(backend_constant).new
+#        return backend.method(:lookup).arity == 4 ? Backend1xWrapper.new(backend) : backend
+#      end
 
       def check_filters(options,key)
         # if there is a blacklist, make sure the key does not match any of the entries.
@@ -65,9 +49,46 @@ class Hiera
         end
       end
 
-#      def lookup(key, scope, order_override, resolution_type, context)
       def lookup(key, scope, order_override, resolution_type)
+        Hiera.debug("WRAP.lookup #{key.inspect}, resolution_type = #{resolution_type.inspect}")
+        Hiera.debug("WRAP config: #{Config[:wrapper].inspect}")
+        @backends ||= {}
+        answer = nil
 
+        #Config[:backends].each do |backend|
+        Config[:wrapper][:backends].each do |wrap_entry|
+          backend=wrap_entry.keys.first.to_s
+          options=wrap_entry[backend.to_sym]
+          if true || constants.include?("#{backend.capitalize}_backend") || constants.include?("#{backend.capitalize}_backend".to_sym)
+            @backends[backend] ||= Backend.const_get("#{backend.capitalize}_backend").new
+            new_answer = catch(:no_such_key) do
+              check_filters(options,key)
+              new_answer = @backends[backend].lookup(key, scope, order_override, resolution_type)
+            end
+
+            if not new_answer.nil?
+              case resolution_type
+              when :array
+                raise Exception, "Hiera type mismatch: expected Array and got #{new_answer.class}" unless new_answer.kind_of? Array or new_answer.kind_of? String
+                answer ||= []
+                answer << new_answer
+              when :hash
+                raise Exception, "Hiera type mismatch: expected Hash and got #{new_answer.class}" unless new_answer.kind_of? Hash
+                answer ||= {}
+                answer = merge_answer(new_answer,answer)
+              else
+                answer = new_answer
+                break
+              end
+            end
+          end
+        end
+
+        answer = Backend.resolve_answer(answer, resolution_type) unless answer.nil?
+        return answer
+      end
+
+      def lookup3(key, scope, order_override, resolution_type, context)
         Hiera.debug("WRAP.lookup #{key.inspect}, resolution_type = #{resolution_type.inspect}")
         @backends ||= {}
         answer = nil
@@ -123,7 +144,8 @@ class Hiera
 
         throw :no_such_key unless found
         return answer
-      end # lookup
+      end # lookup3
+
     end # Wrapper_backend
   end # backend
 end # class hiera

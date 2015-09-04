@@ -1,4 +1,4 @@
 source "http://rubygems.org"
 
-gem "hiera"
+gem "hiera", '~>1.3'
 gem "minitest"

@@ -1,3 +1,4 @@
+require 'rubygems'
 gem 'minitest'
 #require 'minitest/autorun'
 require 'minitest/spec'
@@ -22,41 +23,41 @@ class Hiera
       end
 
       it ":priority lookup should fail when not found in either backend" do
-        assert_throws(:no_such_key) do 
+      result=""
           out,err = capture_subprocess_io do
-            @backend.lookup("no_such_key",{},nil, :priority, nil)
+            result=@backend.lookup("no_such_key",{},nil, :priority)
           end
-        end 
+          assert_equal(nil,result)
       end
 
       it ":array lookup should fail when not found in either backend" do
-        assert_throws(:no_such_key) do 
+          result=""
           out,err = capture_subprocess_io do
-            @backend.lookup("no_such_key",{},nil, :array, nil)
+            result=@backend.lookup("no_such_key",{},nil, :array)
           end
-        end 
+                assert_equal(nil,result)
       end
 
       it ":hash lookup should fail when not found in either backend" do
-        assert_throws(:no_such_key) do 
+        result=""
           out,err = capture_subprocess_io do
-            @backend.lookup("no_such_key",{},nil, :hash, nil)
+            result=@backend.lookup("no_such_key",{},nil, :hash)
           end
-        end 
+          assert_equal(nil,result)
       end
 
       it "element lookup should fail when not found in either backend" do
-        assert_throws(:no_such_key) do 
+          result=""
           out,err = capture_subprocess_io do
-            @backend.lookup("no_such_key.element",{},nil, :priority, nil)
+            result=@backend.lookup("no_such_key.element",{},nil, :priority)
           end
-        end 
+          assert_equal(nil,result)
       end
 
       it "lookup of json_only should return value from json" do
         result = ""
         out,err = capture_subprocess_io do
-          result=@backend.lookup("json_only",{},nil, :priority, nil)
+          result=@backend.lookup("json_only",{},nil, :priority)
         end
         assert_equal("json_only_value",result)
       end 
@@ -64,7 +65,7 @@ class Hiera
       it "lookup of yaml_only should return value from yaml" do
         result = ""
         out,err = capture_subprocess_io do
-          result=@backend.lookup("yaml_only",{},nil, :priority, nil)
+          result=@backend.lookup("yaml_only",{},nil, :priority)
         end
         assert_equal("yaml_only_value",result)
       end 
@@ -72,7 +73,7 @@ class Hiera
       it "lookup of json_and_yaml :priority should return value from json" do
         result = ""
         out,err = capture_subprocess_io do
-          result=@backend.lookup("json_and_yaml",{},nil, :priority, nil)
+          result=@backend.lookup("json_and_yaml",{},nil, :priority)
         end
         assert_equal("json_and_yaml_json_value",result)
       end 
@@ -80,10 +81,11 @@ class Hiera
       it "lookup of json_and_yaml, :array should return value from both" do
         result = ""
         out,err = capture_subprocess_io do
-          result=@backend.lookup("json_and_yaml",{},nil, :array, nil)
+          result=@backend.lookup("json_and_yaml",{},nil, :array)
           #  lookup(key, scope, order_override, resolution_type, context)
         end
-        assert_equal([["json_and_yaml_json_value"], ["json_and_yaml_yaml_value"]],result)
+        #assert_equal([["json_and_yaml_json_value"], ["json_and_yaml_yaml_value"]],result)
+        assert_equal(["json_and_yaml_json_value", "json_and_yaml_yaml_value"],result)
       end 
 
       it "lookup of json_and_yaml (string), :hash should raise exception" do
@@ -91,7 +93,7 @@ class Hiera
         raised=false
         begin
           out,err = capture_subprocess_io do
-            result=@backend.lookup("json_and_yaml",{},nil, :hash, nil)
+            result=@backend.lookup("json_and_yaml",{},nil, :hash)
           end
         rescue Exception
           raised=true
